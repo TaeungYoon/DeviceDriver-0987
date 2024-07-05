@@ -1,5 +1,9 @@
 #pragma once
 #include "FlashMemoryDevice.h"
+#include <exception>
+#include <string>
+
+using namespace std;
 
 class DeviceDriver
 {
@@ -8,6 +12,9 @@ public:
     int read(long address);
     void write(long address, int data);
 
-protected:
+private:
+    void verifyRead(long address, int t);
+
     FlashMemoryDevice* m_hardware;
+    const int MAX_VERIFY = 4;
 };

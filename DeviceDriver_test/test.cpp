@@ -2,6 +2,7 @@
 #include "gmock/gmock.h"
 #include "../DeviceDriverKata/DeviceDriver.cpp"
 #include "../DeviceDriverKata/FlashMemoryDevice.h"
+#include <exception>
 
 using namespace testing;
 
@@ -14,34 +15,58 @@ public:
 class DeviceDriverTestFixture : public testing::Test
 {
 public:
-	FlashMemoryDeviceMock flashMock;
+	NiceMock<FlashMemoryDeviceMock> flashMock;
 	DeviceDriver deviceDriver { &flashMock };
-	long READ_ADDRESS = 0x1234;
-	long READ_PASS_CNT = 5;
-	long READ_PASS_VAL = 100;
-	long READ_FAIL_VAL = 200;
+	long TEST_ADDRESS = 0x1234;
+	int TEST_VALUE = 10;
+	int READ_PASS_CNT = 5;
+	int READ_PASS_VAL = 100;
+	int READ_FAIL_VAL = 200;
+	int WRITE_PASS_VAL = 0xFF;
+	int WRITE_FAL_VAL = 0xAA;
 };
 
-TEST_F(DeviceDriverTestFixture, ReadFiveTimes) {
+TEST_F(DeviceDriverTestFixture, ReadSuccessCase) {
 	//arrange
 
 	//act
-	EXPECT_CALL(flashMock, read)
-		.Times(READ_PASS_CNT);
-
-	//assert
-	deviceDriver.read(READ_ADDRESS);
-}
-
-TEST_F(DeviceDriverTestFixture, ReadFiveTimesAndReturnSuccess) {
-	//arrange
-
-	//act
-	EXPECT_CALL(flashMock, read)
+	EXPECT_CALL(flashMock, read(TEST_ADDRESS))
 		.Times(READ_PASS_CNT)
 		.WillRepeatedly(Return(READ_PASS_VAL));
 
 	//assert
-	deviceDriver.read(READ_ADDRESS);
+	int expected = READ_PASS_VAL;
+	int actual = deviceDriver.read(TEST_ADDRESS);
+	EXPECT_EQ(expected, actual);
 }
 
+TEST_F(DeviceDriverTestFixture, ReadFailCase) {
+	//arrange
+
+	//act
+	EXPECT_CALL(flashMock, read(TEST_ADDRESS))
+		.Times(READ_PASS_CNT)
+		.WillOnce(Return(READ_PASS_VAL))
+		.WillOnce(Return(READ_PASS_VAL))
+		.WillOnce(Return(READ_PASS_VAL))
+		.WillOnce(Return(READ_PASS_VAL))
+		.WillOnce(Return(READ_FAIL_VAL));
+
+	//assert
+	EXPECT_THROW(
+		{ deviceDriver.read(TEST_ADDRESS); },
+		ReadFail
+	);
+}
+
+TEST_F(DeviceDriverTestFixture, WriteSuccessCase) {
+	//arrange
+
+	//act
+	EXPECT_CALL(flashMock, read(TEST_ADDRESS))
+		.Times(1)
+		.WillRepeatedly(Return(WRITE_PASS_VAL));
+
+	//assert
+	deviceDriver.write(TEST_ADDRESS, TEST_VALUE);
+}
