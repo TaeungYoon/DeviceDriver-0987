@@ -82,6 +82,6 @@ TEST_F(DeviceDriverTestFixture, WriteFailCase) {
 	//assert
 	EXPECT_THROW(
 		{ deviceDriver.write(TEST_ADDRESS, TEST_VALUE); },
-		std::exception
+		WriteFail
 	);
 }

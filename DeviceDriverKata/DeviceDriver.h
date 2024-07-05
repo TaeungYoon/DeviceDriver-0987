@@ -13,8 +13,10 @@ public:
     void write(long address, int data);
 
 private:
-    void verifyRead(long address, int t);
+    void verifyReadPass(long address, int t);
+    void verifyWritePass(int readVal);
 
     FlashMemoryDevice* m_hardware;
     const int MAX_VERIFY = 4;
+    const int STATE_DELETE = 0XFF;
 };
