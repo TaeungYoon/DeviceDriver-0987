@@ -26,5 +26,8 @@ void DeviceDriver::verifyRead(long address, int value)
 void DeviceDriver::write(long address, int data)
 {
     int readVal = m_hardware->read(address);
+    if (readVal != 0xFF)
+        throw std::exception();
+
     m_hardware->write(address, (unsigned char)data);
 }

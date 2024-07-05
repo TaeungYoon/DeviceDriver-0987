@@ -23,7 +23,7 @@ public:
 	int READ_PASS_VAL = 100;
 	int READ_FAIL_VAL = 200;
 	int WRITE_PASS_VAL = 0xFF;
-	int WRITE_FAL_VAL = 0xAA;
+	int WRITE_FAIL_VAL = 0xAA;
 };
 
 TEST_F(DeviceDriverTestFixture, ReadSuccessCase) {
@@ -69,4 +69,19 @@ TEST_F(DeviceDriverTestFixture, WriteSuccessCase) {
 
 	//assert
 	deviceDriver.write(TEST_ADDRESS, TEST_VALUE);
+}
+
+TEST_F(DeviceDriverTestFixture, WriteFailCase) {
+	//arrange
+
+	//act
+	EXPECT_CALL(flashMock, read(TEST_ADDRESS))
+		.Times(1)
+		.WillRepeatedly(Return(WRITE_FAIL_VAL));
+
+	//assert
+	EXPECT_THROW(
+		{ deviceDriver.write(TEST_ADDRESS, TEST_VALUE); },
+		std::exception
+	);
 }
