@@ -2,6 +2,7 @@
 #include "gmock/gmock.h"
 #include "../DeviceDriverKata/DeviceDriver.cpp"
 #include "../DeviceDriverKata/FlashMemoryDevice.h"
+#include "../DeviceDriverKata/app.cpp"
 #include <exception>
 
 using namespace testing;
@@ -84,4 +85,32 @@ TEST_F(DeviceDriverTestFixture, WriteFailCase) {
 		{ deviceDriver.write(TEST_ADDRESS, TEST_VALUE); },
 		WriteFail
 	);
+}
+
+TEST_F(DeviceDriverTestFixture, ReadAndPrintSuccessCase)
+{
+	//arrange
+	long startAddr = 0x01;
+	long endAddr = 0x4;
+	Application app{ &deviceDriver };
+
+	//act
+	EXPECT_CALL(flashMock, read(_))
+		.Times(20);
+
+	//assert
+	app.ReadAndPrint(startAddr, endAddr);
+}
+
+TEST_F(DeviceDriverTestFixture, WriteAll)
+{
+	//arrange
+	Application app{ &deviceDriver };
+
+	//act
+	EXPECT_CALL(flashMock, read(_))
+		.Times(5)
+		.WillRepeatedly(Return(WRITE_PASS_VAL));
+
+	app.WriteAll(1);
 }
